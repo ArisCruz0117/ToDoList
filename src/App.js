@@ -45,9 +45,9 @@ function App({todos, addTodo, removeTodo, completeToDo, populateTodos}) {
     const i = JSON.parse(localStorage.getItem("idx"));
     if (todos) {
       populateTodos({todos, i});
-    }
-    if(todos.length === 0) {
-      setIdx(0);
+      if(todos.length === 0) {
+        setIdx(0);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
