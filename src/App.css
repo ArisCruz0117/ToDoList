@@ -1,0 +1,9 @@
+.centered{
+  text-align: center;
+  align-items: center;
+}
+
+.cleanup{
+  margin-top: 20px;
+  margin-left: calc(50% - 25px);
+}
