@@ -16,7 +16,7 @@ const ToDo = ({ todos, removeToDo, completeToDo }) => {
               className="listItem"
               avatar={todo.completed ? "✅" : "❌"}
               title={<p>{todo.title}</p>}
-              onClick={() => completeToDo(todo.title, todo.completed, todo.idx)}
+              onClick={() => completeToDo({title: todo.title, completed: todo.completed, idx: todo.idx})}
             />
           </List.Item>
         )}

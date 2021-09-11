@@ -1,25 +1,30 @@
-import React, { useState, useEffect, useReducer } from "react";
-import todosReducer from "./reducers/todos";
+import React, { useState, useEffect } from "react";
 import "./App.css";
+import { connect } from "react-redux";
 import ToDos from "./components/Todo";
 import { Button, Typography } from 'antd';
+import populateTodos from "./redux/actions/populateTodos"
+import addTodo from "./redux/actions/addTodo"
+import removeTodo from "./redux/actions/removeTodo"
+import completeToDo from "./redux/actions/completeTodo"
 
 const { Title } = Typography;
 
-function App() {
-  const [todos, dispatch] = useReducer(todosReducer, []);
+function App({todos, addTodo, removeTodo, completeToDo, populateTodos}) {
   const [title, setTitle] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [idx, setIdx] = useState(localStorage.getItem("idx"));
+  const [idx, setIdx] = useState(localStorage.getItem("idx"));//localStorage.getItem("idx")
 
-  const addToDo = (e) => {
+  const addElement = (e) => {
     e.preventDefault();
-    dispatch({
-      type: "ADD_TODO",
-      title,
-      completed,
+
+    const todo = {
+      title: title,
       idx,
-    });
+      completed
+    }
+
+    addTodo(todo);
     setTitle("");
     setCompleted(false);
     if (title !== "") {
@@ -27,31 +32,24 @@ function App() {
     }
   };
 
-  const removeToDo = (idx) => {
-    dispatch({
-      type: "REMOVE_TODO",
-      idx,
-    });
+  const removeElement = (idx) => {
+    removeTodo(idx);
   };
 
-  const completeToDo = (title, completed, idx) => {
-    dispatch({
-      type: "COMPLETE_TODO",
-      idx,
-      title,
-      completed,
-    });
+  const completeElement = (todo) => {
+    completeToDo(todo);
   };
 
   useEffect(() => {
     const todos = JSON.parse(localStorage.getItem("todos"));
-
+    const i = JSON.parse(localStorage.getItem("idx"));
     if (todos) {
-      dispatch({ type: "POPULATE_TODOS", todos });
-      if(todos.length === 0) {
-          setIdx(0);
-      }
+      populateTodos({todos, i});
     }
+    if(todos.length === 0) {
+      setIdx(0);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -60,7 +58,6 @@ function App() {
   }, [todos, idx]);
 
   function cleanup() {
-    dispatch({ type: "CLEANUP"});
     console.log("cleanup");
     localStorage.clear();
     window.location.reload();
@@ -71,11 +68,11 @@ function App() {
       <Title className="centered">ToDo App</Title>
       <ToDos
         todos={todos}
-        removeToDo={removeToDo}
-        completeToDo={completeToDo}
+        removeToDo={removeElement}
+        completeToDo={completeElement}
       />
       
-      <form onSubmit={addToDo} className="centered">
+      <form onSubmit={addElement} className="centered">
         <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} />
         <button>Add ToDo</button>
       </form>
@@ -84,4 +81,23 @@ function App() {
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    todos: state.todosReducer.todos,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addTodo: (todo) => dispatch(addTodo(todo)), //addTodo
+    removeTodo: (idx) => dispatch(removeTodo(idx)), //removeTodo
+    completeToDo: (todo) => dispatch(completeToDo(todo)), //completeToDo
+    populateTodos: (todos) => dispatch(populateTodos(todos)) //populateTodos
+  };
+};
+
+// state       ,    actions
+const wrapper = connect(mapStateToProps, mapDispatchToProps);
+const component = wrapper(App); //which component I'm modifying
+
+export default component;
